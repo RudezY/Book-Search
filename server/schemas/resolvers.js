@@ -6,7 +6,7 @@ const resolvers = {
     Query : {
         me: async ( parent, args, context) => {
             if (context.user) {
-                const userData = await User.findOne({ _id: context.user._id }).select('-__v -password');
+                const userData = await User.findOne({ _id: context.user._id }).populate("savedBooks").select('-__v -password');
                 return userData;
         }
         throw new AuthenticationError('Not logged in');
@@ -17,10 +17,11 @@ Mutation: {
     addUser: async (parent, args) => {
         const user = await User.create(args);
         const token = signToken(user);
-
+        console.log(token)
         return { token, user};
 },
-login: async (parent, { email, password }) => {
+login: async (parent, { email, password }, context) => {
+  console.log("LOGIN RESOLVER", context )
     const user = await User.findOne({ email });
 
     if (!user) {
